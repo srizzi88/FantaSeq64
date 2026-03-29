@@ -1,0 +1,97 @@
+; ============================================================
+; irq.asm — MIDI Sequencer IRQ Handler
+; Fires on every 6840 PTM tick
+; PPQN is configurable
+;
+; Responsibilities:
+;   - Acknowledge the timer interrupt
+;   - Maintain TICKS counter
+;   - Dispatch MIDI events from the event table into CIRCBUF
+;   - Set HALTED when the end-of-table sentinel is reached
+;
+; ============================================================
+
+!zone irq
+
+IRQ_HANDLER:
+    ; Is this our interrupt?
+    LDA TIMERSTAT
+    AND #$01
+    BEQ .not_our_irq
+
+    ; Acknowledge timer
+    LDA TIMERACK
+
+    ; PPQN bookkeeping 
+    DEC TICKS
+    BNE .skip_beat
+
+    ; Reload if count reached zero
+    LDA PPQN
+    STA TICKS
+
+.skip_beat:
+    ; If already halted, nothing more to do
+    LDA HALTED
+    BNE .exit_irq
+
+    ; Delta countdown 
+    LDA DELTA
+    BEQ .dispatch
+    DEC DELTA
+    BNE .exit_irq
+
+    ; Event dispatch loop
+    ; Entered when DELTA reaches zero
+    ; May iterate for simultaneous events (DELTA == $00).
+.dispatch:
+    LDY #0
+    LDA (EVTPTRLO),Y      ; read DELTA byte
+    CMP #$FF
+    BEQ .nop_record       ; $FF means NOP, skip record
+
+    INY
+    LDA (EVTPTRLO),Y      ; read STATUS byte
+    BNE .fire_event
+
+    ; STATUS == $00 means end-of-table sentinel
+    ; Set HALTED status
+    LDA #$01
+    STA HALTED
+    JMP .exit_irq
+
+.fire_event:
+    ; Write STATUS, NOTE, VELOCITY into circular buffer
+    LDX BUFHEAD
+    STA CIRCBUF,X         ; STATUS
+    INX
+    INY
+    LDA (EVTPTRLO),Y      ; NOTE
+    STA CIRCBUF,X
+    INX
+    INY
+    LDA (EVTPTRLO),Y      ; VELOCITY
+    STA CIRCBUF,X
+    INX
+    STX BUFHEAD
+
+.nop_record:
+    ; Advance event pointer by 4 bytes
+    LDA EVTPTRLO
+    CLC
+    ADC #4
+    STA EVTPTRLO
+    BCC .load_delta
+    INC EVTPTRHI
+
+.load_delta:
+    LDY #0
+    LDA (EVTPTRLO),Y      ; peek at next record's DELTA
+    BEQ .dispatch         ; DELTA == $00 means next event happens in this tick, loop immediately
+    STA DELTA
+
+.exit_irq:
+    JMP KERNALIRQ
+
+.not_our_irq:
+    JMP KERNALSYS
