@@ -1,20 +1,19 @@
 ; ============================================================
 ; main.asm — Initializer, Main Drain Loop, and Teardown
-; Installed after interrupt service in memory.  Called from BASIC via SYS.
+; Installed after interrupt service in memory.  
+; Called from BASIC via SYS 49152; which jumps to INIT
 ;
 ; Responsibilities:
 ;   - Save and replace the IRQ vector
 ;   - Initialize all variables and hardware (ACIA, EVT_PTR)
 ;   - Release the 6840 timer (BASIC has pre-loaded the latches)
-;   - Drain CIRC_BUF → 6850 ACIA in a tight poll loop
+;   - Drain CIRCBUF to 6850 ACIA in a tight poll loop
 ;   - Detect keypress
 ;   - Perform clean teardown and return to BASIC
-;
 ; ============================================================
 
 !zone main
 
-; ── Initializer ────────────────────────────────────────────
 INIT:
     ; Disable interrupts
     SEI
@@ -64,8 +63,6 @@ INIT:
     LDA #$42
     STA TIMERCTRL
 
-
-; ── Main Drain Loop ────────────────────────────────────────
 MAIN_LOOP:
     LDA BUFHEAD
     CMP BUFTAIL
@@ -92,10 +89,8 @@ MAIN_LOOP:
 .check_key:
     JSR GETIN
     BEQ MAIN_LOOP            ; no key, keep looping
-    ; if any key pressed, fall through to teardown
+    ; if any key pressed, fall through to TEARDOWN
 
-
-; ── Teardown ───────────────────────────────────────────────
 TEARDOWN:
     ; Disable interrupts
     SEI
@@ -112,5 +107,6 @@ TEARDOWN:
 
     ; Enable interrupts
     CLI
-    RTS                      ; return cleanly to BASIC
 
+    ; return cleanly to BASIC
+    RTS

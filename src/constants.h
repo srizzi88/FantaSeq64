@@ -16,7 +16,7 @@ KERNALIRQ     = $EA81        ; normal KERNAL IRQ exit
 KERNALSYS     = $EA31        ; pass-through for non-owned IRQs
 GETIN         = $FFE4        ; keyboard scan — returns char in A, 0 if none
 
-; --- Passport MH-02 / Motorola 6840 PTM ---
+; --- Motorola 6840 PTM ---
 TIMERCTRL     = $DE00        ; PTM control register
 TIMERSTAT     = $DE01        ; PTM status register  (bit 0 = our IRQ pending)
 TIMERACK      = $DE02        ; read to acknowledge timer interrupt
@@ -27,5 +27,8 @@ ACIASTAT      = $DE08        ; read:  status   register (bit 1 = TDRE ready)
 ACIADATA      = $DE09        ; read/write: MIDI data register
 
 ; --- Event Table (page-aligned, filled by separately loaded .prg) ---
-; Records are 4 bytes each: [DELTA, STATUS, NOTE, VELOCITY]
+; Records are 4 bytes each: 
+; 3-byte Midi message       [DELTA, STATUS, NOTE,   VELOCITY]
+; or 2-byte Midi message    [DELTA, 0x00  , STATUS, DATA    ]
+; or EOF marker             [DELTA, 0xFF  , 0x00,   0x00    ]
 EVTTABLE      = $0C00

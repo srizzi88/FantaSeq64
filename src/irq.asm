@@ -1,5 +1,5 @@
 ; ============================================================
-; irq.asm — MIDI Sequencer IRQ Handler
+; irq.asm — MIDI player IRQ Handler
 ; Fires on every 6840 PTM tick
 ; PPQN is configurable
 ;
@@ -8,7 +8,6 @@
 ;   - Maintain TICKS counter
 ;   - Dispatch MIDI events from the event table into CIRCBUF
 ;   - Set HALTED when the end-of-table sentinel is reached
-;
 ; ============================================================
 
 !zone irq
