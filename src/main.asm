@@ -21,6 +21,14 @@ STOP_TIMER:
     SEI
     LDA #$43
     STA TIMERCTRL
+
+    ; Clear any pending PTM interrupt before restoring vectors.
+    LDA TIMERSTAT
+    AND #$01
+    BEQ .done
+    LDA TIMERACK
+
+.done:
     RTS
 
 PANIC_ALL_NOTES_OFF:
