@@ -10,7 +10,7 @@
 110 rem
 111 rem *** before running this loader: ***
 112 rem load the machine code first:
-113 rem   load "sequencer.prg",8,1
+113 rem   load "fantaseq64.prg",8,1
 114 rem then load the midi event table:
 115 rem   load "events.prg",8,1
 116 rem then load and run this loader:
