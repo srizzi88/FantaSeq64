@@ -36,9 +36,6 @@ INIT:
     STA BUFHEAD
     STA BUFTAIL
 
-    LDA PPQN
-    STA TICKS
-
     ; Configure 6850 ACIA: master reset, then 8-N-1 / div-16
     LDA #$03
     STA ACIACTRL

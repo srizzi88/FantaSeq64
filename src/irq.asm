@@ -21,15 +21,6 @@ IRQ_HANDLER:
     ; Acknowledge timer
     LDA TIMERACK
 
-    ; PPQN bookkeeping 
-    DEC TICKS
-    BNE .skip_beat
-
-    ; Reload if count reached zero
-    LDA PPQN
-    STA TICKS
-
-.skip_beat:
     ; If already halted, nothing more to do
     LDA HALTED
     BNE .exit_irq

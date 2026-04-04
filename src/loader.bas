@@ -17,8 +17,6 @@
 117 rem   load "loader.prg",8
 118 rem   run
 119 rem
-122 rem poke ppqn into $c003 (49155)
-123 poke 49155, ppqn
 124 rem set 6840 latch values from BPM and PPQN
 125 l = int(1022727 * 60 / (bpm * ppqn) + .5) - 1
 130 lh = int(l / 256) : ll = l - lh * 256
