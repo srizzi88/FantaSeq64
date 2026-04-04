@@ -17,12 +17,14 @@ FantaSeq64 is an interrupt-driven MIDI sequencer designed to work with the Passp
 - `src/loader.bas`: The tokenized BASIC loader. Handles timer latch math, configures the PTM, lowers Top of BASIC to free memory, and calls `SYS 49152`.
 
 # Memory Map
-- `$00FB`–`$00FC`: Zero-page pointer to the event table.
-- `$0C00`+: MIDI event table (Starts here because BASIC memory is restricted to `$0BFF`).
-- `$C000`–`$C002`: Entry point jump.
-- `$C003`–`$C00A`: RAM Variables (`PPQN`, `HALTED`, `DELTA`, `BUFHEAD`, etc.).
-- `$C00B`–`$C0FF`: Initializer, main loop, teardown, and IRQ handler code.
-- `$C100`–`$C1FF`: Circular buffer (256 bytes, page-aligned).
+- `$00FB`–`$00FC` : Zero page event table pointer 
+- `$0C00`+        : MIDI event table 
+- `$C000`–`$C002` : Entry point jump 
+- `$C003`         : Variables ( `HALTED`, `DELTA`, `BUFHEAD`, etc.) 
+- `$C100`–`$C1FF` : Circular buffer (256 bytes, page-aligned) 
+- `$C200`         : Initializer, main loop, teardown, IRQ handler 
+
+
 
 # Design Decisions & Constraints
 1. **Bare Minimum Functionality:** Prioritize speed and low-jitter execution over safety. 
