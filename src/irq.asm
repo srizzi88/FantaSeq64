@@ -7,7 +7,7 @@
 ;   - Acknowledge the timer interrupt
 ;   - Maintain TICKS counter
 ;   - Dispatch MIDI events from the event table into CIRCBUF
-;   - Set HALTED when the end-of-table sentinel is reached
+;   - Set HALTED when the EOF sentinel is reached
 ; ============================================================
 
 !zone irq
@@ -16,7 +16,7 @@ IRQ_HANDLER:
     ; Is this our interrupt?
     LDA TIMERSTAT
     AND #$01
-    BEQ .not_our_irq
+    BEQ .exit_irq
 
     ; Acknowledge timer
     LDA TIMERACK
@@ -81,7 +81,5 @@ IRQ_HANDLER:
     STA DELTA
 
 .exit_irq:
-    JMP KERNALIRQ
+    JMP (OLDVECLO)
 
-.not_our_irq:
-    JMP KERNALSYS
