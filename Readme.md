@@ -97,9 +97,9 @@ If you use the ACME assembler your output files will look like these:
 | `$00FB`–`$00FC` | Zero page event table pointer |
 | `$0C00`+ | MIDI event table |
 | `$C000`–`$C002` | Entry point jump |
-| `$C003`–`$C00A` | Variables (`PPQN`, `HALTED`, `DELTA`, `BUFHEAD`, etc.) |
-| `$C00B`–`$C0FF` | Initializer, main loop, teardown, IRQ handler |
+| `$C003`–`$C00A` | Variables ( `HALTED`, `DELTA`, `BUFHEAD`, etc.) |
 | `$C100`–`$C1FF` | Circular buffer (256 bytes, page-aligned) |
+| `$C00B`–`$C0FF` | Initializer, main loop, teardown, IRQ handler |
 
 
 ***
