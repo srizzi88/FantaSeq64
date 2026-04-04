@@ -8,11 +8,49 @@
 ;   - Initialize all variables and hardware (ACIA, EVT_PTR)
 ;   - Release the 6840 timer (BASIC has pre-loaded the latches)
 ;   - Drain CIRCBUF to 6850 ACIA in a tight poll loop
-;   - Detect keypress
+;   - Detect keypress and send MIDI All Notes Off panic
 ;   - Perform clean teardown and return to BASIC
 ; ============================================================
 
 !zone main
+
+; Helper routines
+
+STOP_TIMER:
+    ; Disable interrupts and stop the PTM.
+    SEI
+    LDA #$43
+    STA TIMERCTRL
+    RTS
+
+PANIC_ALL_NOTES_OFF:
+    ; Send CC123 value 0 on all 16 MIDI channels.
+    LDX #$0F
+.panic_loop:
+    TXA
+    ORA #$B0
+    JSR SEND_ACIA_BYTE
+    LDA #$7B
+    JSR SEND_ACIA_BYTE
+    LDA #$00
+    JSR SEND_ACIA_BYTE
+    DEX
+    BPL .panic_loop
+    RTS
+
+SEND_ACIA_BYTE:
+    ; Byte to send is passed in A. Uses Y as a scratch register.
+    TAY
+.wait_tdre:
+    LDA ACIASTAT
+    AND #$02
+    BEQ .wait_tdre
+    TYA
+    STA ACIADATA
+    RTS
+
+
+; Entry point from BASIC
 
 INIT:
     ; Disable interrupts
@@ -86,16 +124,17 @@ MAIN_LOOP:
 .check_key:
     JSR GETIN
     BEQ MAIN_LOOP            ; no key, keep looping
-    ; if any key pressed, fall through to TEARDOWN
+
+    ; Manual stop: stop further PTM IRQ production, send MIDI panic,
+    ; then continue through the shared teardown tail.
+    JSR STOP_TIMER
+    JSR PANIC_ALL_NOTES_OFF
+    JMP .restore_exit
 
 TEARDOWN:
-    ; Disable interrupts
-    SEI
+    JSR STOP_TIMER
 
-    ; Stop the timer — no more IRQs
-    LDA #$43
-    STA TIMERCTRL
-
+.restore_exit:
     ; Restore original IRQ vector
     LDA OLDVECLO
     STA IRQVECLO
@@ -107,3 +146,4 @@ TEARDOWN:
 
     ; return cleanly to BASIC
     RTS
+

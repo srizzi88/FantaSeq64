@@ -1,5 +1,5 @@
 ; ============================================================
-; variables.h — RAM variable allocation and buffer layout
+; variables.asm — RAM variable allocation and buffer layout
 ;
 ; Emits actual bytes into the binary.
 ; ============================================================
