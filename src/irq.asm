@@ -44,37 +44,37 @@ IRQ_HANDLER:
     ; Entered when DELTA reaches zero
     ; May iterate for simultaneous events (DELTA == $00).
 .dispatch:
-    LDY #0
-    LDA (EVTPTRLO),Y      ; read DELTA byte
+    LDY #1
+    LDA (EVTPTRLO),Y      ; read byte 1
     CMP #$FF
-    BEQ .nop_record       ; $FF means NOP, skip record
+    BEQ .eof_record
 
+    LDX BUFHEAD           ; prepare write pointer
+    CMP #$00
+    BEQ .two_byte_event
+
+.three_byte_event:
+    STA CIRCBUF,X         ; write byte 1
+    INX
+
+.two_byte_event:
     INY
-    LDA (EVTPTRLO),Y      ; read STATUS byte
-    BNE .fire_event
+    LDA (EVTPTRLO),Y      ; read byte 2
+    STA CIRCBUF,X
+    INX
+    INY
+    LDA (EVTPTRLO),Y      ; read byte 3
+    STA CIRCBUF,X
+    INX
+    STX BUFHEAD           ; save updated write pointer
+    JMP .advance_pointer
 
-    ; STATUS == $00 means end-of-table sentinel
-    ; Set HALTED status
+.eof_record:
     LDA #$01
     STA HALTED
     JMP .exit_irq
 
-.fire_event:
-    ; Write STATUS, NOTE, VELOCITY into circular buffer
-    LDX BUFHEAD
-    STA CIRCBUF,X         ; STATUS
-    INX
-    INY
-    LDA (EVTPTRLO),Y      ; NOTE
-    STA CIRCBUF,X
-    INX
-    INY
-    LDA (EVTPTRLO),Y      ; VELOCITY
-    STA CIRCBUF,X
-    INX
-    STX BUFHEAD
-
-.nop_record:
+.advance_pointer:
     ; Advance event pointer by 4 bytes
     LDA EVTPTRLO
     CLC

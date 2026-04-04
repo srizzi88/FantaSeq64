@@ -27,8 +27,8 @@ ACIASTAT      = $DE08        ; read:  status   register (bit 1 = TDRE ready)
 ACIADATA      = $DE09        ; read/write: MIDI data register
 
 ; --- Event Table (page-aligned, filled by separately loaded .prg) ---
-; Records are 4 bytes each: 
-; 3-byte Midi message       [DELTA, STATUS, NOTE,   VELOCITY]
-; or 2-byte Midi message    [DELTA, 0x00  , STATUS, DATA    ]
-; or EOF marker             [DELTA, 0xFF  , 0x00,   0x00    ]
+; Records are 4 bytes each: [DELTA, BYTE1, BYTE2, BYTE3]
+; BYTE1 = 0x80-0xFE:        3-byte message (BYTE1, BYTE2, BYTE3 transmitted)
+; BYTE1 = 0x00:             2-byte message (BYTE2, BYTE3 transmitted)
+; BYTE1 = 0xFF:             EOF marker
 EVTTABLE      = $0C00

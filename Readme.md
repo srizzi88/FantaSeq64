@@ -1,4 +1,4 @@
-# FantaSeq64 - A low-jitter Commodore 64 MIDI Player
+# FantaSeq64 - A minimal Commodore 64 MIDI Player
 
 A MIDI player for the Commodore 64 using the Passport MH-02 midi cartridge.
 The sequencer is interrupt-driven and plays a sequence of MIDI events from
@@ -92,28 +92,25 @@ If you use the ACME assembler your output files will look like these:
 
 ## Memory Map
 
-[ NEEDS FIXING ]
-
 | Address Range | Contents |
 | :-- | :-- |
 | `$00FB`–`$00FC` | Zero page event table pointer |
-| `$C000`–`$C0xx` | IRQ handler |
-| `$C080`–`$C088` | Variables (HALTED, DELTA_COUNT, BUF_HEAD, etc.) |
-| `$C0xx`+ | Initializer, main drain loop, teardown |
-| `$C200`–`$C2FF` | Circular buffer (256 bytes, page-aligned) |
-| `$C300`+ | MIDI event table |
+| `$0C00`+ | MIDI event table |
+| `$C000`–`$C002` | Entry point jump |
+| `$C003`–`$C00A` | Variables (`PPQN`, `HALTED`, `DELTA`, `BUFHEAD`, etc.) |
+| `$C00B`–`$C0FF` | Initializer, main loop, teardown, IRQ handler |
+| `$C100`–`$C1FF` | Circular buffer (256 bytes, page-aligned) |
 
 
 ***
 
 ## Loading on the C64
 
-[ This is missing a step to load the data ]
-
 Load the files in this order:
 
 ```basic
-LOAD "MIDIPLAYER.PRG",8,1
+LOAD "FANTASEQ64.PRG",8,1
+LOAD "EVENTS.PRG",8,1
 LOAD "LOADER.PRG",8
 RUN
 ```
@@ -125,15 +122,13 @@ RUN
 
 ## Adjusting BPM
 
-[ fix line number ]
-
-Edit line 120 of `src/loader.bas`:
+Edit line 105 of `src/loader.bas`:
 
 ```basic
-120 bpm = 60
+105 bpm = 60
 ```
 
-The timer latch is computed automatically from the BPM value. Valid range is approximately 20–240 BPM with the 6840 PTM at NTSC PHI2 (1,022,727 Hz).
+The timer latch is computed automatically from the BPM and PPQN values. Because the 6840 PTM uses a 16-bit counter (max value 65535), the minimum supported tempo at 24 PPQN without overflow is approximately 40 BPM.
 
 ***
 
@@ -151,5 +146,6 @@ The system is divided into three layers:
 
 The IRQ and main loop communicate exclusively through the circular buffer and the `HALTED` flag.
 
-[ additional details of the whole design missing ]
+### Circular Buffer Constraints
 
+For simplicity and speed, the IRQ handler does not check for buffer overruns before writing. The application generating the MIDI event table is responsible for tracking buffer usage and setting appropriate thresholds or delays to ensure the 256-byte buffer is not overwhelmed during dense musical passages (e.g., large simultaneous chords).
