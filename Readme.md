@@ -92,14 +92,14 @@ If you use the ACME assembler your output files will look like these:
 
 ## Memory Map
 
-| Address Range | Contents |
-| :-- | :-- |
+| Address Range   | Contents |
+| :--             | :-- |
 | `$00FB`–`$00FC` | Zero page event table pointer |
-| `$0C00`+ | MIDI event table |
+| `$0C00`+        | MIDI event table |
 | `$C000`–`$C002` | Entry point jump |
-| `$C003`–`$C00A` | Variables ( `HALTED`, `DELTA`, `BUFHEAD`, etc.) |
+| `$C003`         | Variables ( `HALTED`, `DELTA`, `BUFHEAD`, etc.) |
 | `$C100`–`$C1FF` | Circular buffer (256 bytes, page-aligned) |
-| `$C00B`–`$C0FF` | Initializer, main loop, teardown, IRQ handler |
+| `$C200`         | Initializer, main loop, teardown, IRQ handler |
 
 
 ***
