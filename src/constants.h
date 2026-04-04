@@ -12,8 +12,6 @@ IRQVECLO      = $0314        ; C64 IRQ vector low  byte
 IRQVECHI      = $0315        ; C64 IRQ vector high byte
 
 ; --- KERNAL Routines ---
-KERNALIRQ     = $EA81        ; normal KERNAL IRQ exit
-KERNALSYS     = $EA31        ; pass-through for non-owned IRQs
 GETIN         = $FFE4        ; keyboard scan — returns char in A, 0 if none
 
 ; --- Motorola 6840 PTM ---

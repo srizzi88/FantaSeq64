@@ -1,8 +1,7 @@
 ; ============================================================
 ; variables.h — RAM variable allocation and buffer layout
 ;
-; Emits actual bytes into the binary — no equates here.
-; !src'd last in all.asm so all variables land after code.
+; Emits actual bytes into the binary.
 ; ============================================================
 
 ; --- RAM Variables ---
